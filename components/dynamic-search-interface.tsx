@@ -24,7 +24,7 @@ export function DynamicSearchInterface() {
     setIsSearching(true)
 
     try {
-      const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/query`, { query: query });
+      const result = await axios.post('/api/query', { query: query });
       console.log({result});
       // Simulated response
       const simulatedResponse = {

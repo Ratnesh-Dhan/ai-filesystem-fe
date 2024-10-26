@@ -2,7 +2,6 @@
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
-import { FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const UploadBox = () => {
@@ -21,6 +20,7 @@ const UploadBox = () => {
   };
 
   const handleClick = async (event: React.FormEvent) => {
+    toast.success("clicked", {position: "bottom-left"});
     event.preventDefault();
     console.log("upload button clicked");
     if (!file) {
@@ -31,7 +31,7 @@ const UploadBox = () => {
     formData.append('file', file);
     try {
         console.log({formData})
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/upload`, formData);
+        const response = await axios.post(`/api/upload`, formData);
 
         console.log(response.data.message);
         toast.success("Upload Succesful", {position: 'bottom-right'});
@@ -68,7 +68,7 @@ const UploadBox = () => {
         </div>
         <Button 
           type="submit" 
-          className="mt-2 w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md"
+          className="mt-2 w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 rounded-lg transition-all duration-300 transform shadow-md active:shadow-lg active:scale-105"
           onClick={handleClick}
         >
             Upload
