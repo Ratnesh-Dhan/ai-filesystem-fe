@@ -27,10 +27,7 @@ export function DynamicSearchInterface() {
       const result = await axios.post('/api/query', { query: query });
       console.log({result});
       // Simulated response
-      const simulatedResponse = {
-        answer: result.data.response.answer, 
-        sources: result.data.response.sources
-      }
+      const simulatedResponse = result.data.simulatedResponse;
 
       setResult(simulatedResponse)
     } catch (error) {

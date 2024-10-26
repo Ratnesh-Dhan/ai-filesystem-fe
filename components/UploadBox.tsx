@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
@@ -6,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const UploadBox = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false); // New state for uploading status
 
   const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -20,13 +20,13 @@ const UploadBox = () => {
   };
 
   const handleClick = async (event: React.FormEvent) => {
-    toast.success("clicked", {position: "bottom-left"});
     event.preventDefault();
     console.log("upload button clicked");
     if (!file) {
         alert("Please select a file to upload.");
         return;
     }
+    setIsUploading(true); // Set uploading state to true
     const formData = new FormData();
     formData.append('file', file);
     try {
@@ -40,6 +40,8 @@ const UploadBox = () => {
     }catch (e){
         console.error(e);
         toast.error("Upload unsuccesful",{position: 'bottom-right'});
+    } finally {
+        setIsUploading(false); // Reset uploading state
     }
   }
 
@@ -70,8 +72,9 @@ const UploadBox = () => {
           type="submit" 
           className="mt-2 w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 rounded-lg transition-all duration-300 transform shadow-md active:shadow-lg active:scale-105"
           onClick={handleClick}
+          disabled={isUploading}
         >
-            Upload
+            {isUploading ? "Uploading..." : "Upload"} {/* Change button text based on uploading state */}
         </Button>
       </div>
   )
