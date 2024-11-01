@@ -1,5 +1,4 @@
-import { DynamicSearchInterface } from "@/components/dynamic-search-interface"
-
+import Home from "./Home/page"
 export default function Page() {
-  return <DynamicSearchInterface />
+  return <Home />
 }

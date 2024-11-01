@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, Search } from "lucide-react"
 import axios from "axios"
-import UploadBox from "./UploadBox"
-import Indexing from "./Indexing"
 
-export function DynamicSearchInterface() {
+import Upload from "@/app/Upload/page"
+
+function Home() {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState<{ answer: string; sources: string[] } | null>(null)
   const [isSearching, setIsSearching] = useState(false)
@@ -86,8 +86,10 @@ export function DynamicSearchInterface() {
         </CardFooter>
       )}
     </Card>
-    <UploadBox />
+    {/* <Upload /> */}
     {/* <Indexing /> */}
     </>
   )
 }
+
+export default Home

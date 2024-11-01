@@ -1,9 +1,10 @@
+"use client"
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
 import toast from 'react-hot-toast';
 
-const UploadBox = () => {
+const Upload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false); // New state for uploading status
 
@@ -48,7 +49,7 @@ const UploadBox = () => {
   return (
     <div className="my-10 mx-auto w-[55%] p-6 border border-gray-300 rounded-lg shadow-lg bg-white">
         <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="file-upload">
-          Upload a file:
+          Upload a file:/home/zumbie/Codes/lumio/ai-fe
         </label>
         <div 
           className="relative mb-4 border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer"
@@ -80,4 +81,4 @@ const UploadBox = () => {
   )
 }
 
-export default UploadBox
+export default Upload
