@@ -40,7 +40,7 @@ function Home() {
 
   return (
     <>
-    <Card className="w-full max-w-3xl mx-auto bg-gradient-to-br from-purple-100 to-indigo-100 shadow-lg">
+    <Card className="mt-10 w-full max-w-3xl mx-auto bg-gradient-to-br from-purple-100 to-indigo-100 shadow-lg">
       <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-t-lg">
         <CardTitle className="text-2xl font-bold flex items-center">
           <Search className="w-6 h-6 mr-2" />
@@ -86,8 +86,7 @@ function Home() {
         </CardFooter>
       )}
     </Card>
-    {/* <Upload /> */}
-    {/* <Indexing /> */}
+
     </>
   )
 }
