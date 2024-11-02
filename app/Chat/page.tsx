@@ -4,9 +4,11 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Send, User, Bot } from "lucide-react"
+import { Send, User, Bot, MessageSquareOff } from "lucide-react"
 import axios from "axios"
 import { headers } from "next/headers"
+import { log } from "console"
+import toast from "react-hot-toast"
 
 type Message = {
   id: number;
@@ -38,33 +40,6 @@ export default function ChatPage() {
   useEffect(()=>{
     const sessionId = generateUUID();
     setSessionID(sessionId);
-    console.log("start session ",sessionId);
-    // console.log("inside use effect")
-    // if (localStorage.getItem('sessionId') === null) {
-    //   const sessionId = generateUUID();
-    //   console.log({sessionId})
-    //   localStorage.setItem('sessionId', sessionId);
-    //   setSessionID(sessionId);
-    // }
-    // else {
-    //   const sessionId = localStorage.getItem('sessionId');
-    //   setSessionID(sessionId);
-    //   console.log(sessionId, " we got it");
-    // }
-
-    
-    // return ()=>{
-    //   console.log("end session ", sessionId);
-    //   axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/end-chat`, {
-    //     headers: {
-    //       'Temp-Session-ID': sessionId
-    //     }
-    //   }).then((response)=> {
-    //     console.log(response.data.message);
-    //   }).catch((e)=>{
-    //     console.log(e);
-    //     });
-    // }
   },[]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +63,6 @@ export default function ChatPage() {
           // 'Content-Type': 'application/json'
         }
       })
-      console.log(response.data.response)
       const botMessage: Message = { id: Date.now() + 1, text: response.data.response, sender: 'bot' }
       setMessages(prevMessages => [...prevMessages, botMessage])
     } catch (error) {
@@ -100,15 +74,48 @@ export default function ChatPage() {
     }
   }
 
+  const handleEndChat = async () => {
+    if ( messages.length === 0) {
+      toast.success("No chat to clear");
+      return;
+    }
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/end-chat`, {}, {
+        headers: {
+          'Temp-Session-ID': sessionID
+        }
+      }).then((response)=>{
+        console.log(response.data.message);
+        if( response.data.status === 200)
+          toast.success("Chat ended successfully");
+      });
+      setMessages([]);
+      const newSessionId = generateUUID();
+      setSessionID(newSessionId);
+    } catch (error) {
+      console.error("Error ending chat:", error);
+    }
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-      <Card className="w-full max-w-3xl mx-auto h-[calc(100vh-2rem)] sm:h-[600px] flex flex-col bg-gradient-to-br from-purple-100 to-indigo-100 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+    <Card className="w-full max-w-3xl mx-auto h-[calc(100vh-2rem)] sm:h-[600px] flex flex-col bg-gradient-to-br from-purple-100 to-indigo-100 shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+        <div className="flex justify-between items-center">
           <CardTitle className="text-xl sm:text-2xl font-bold flex items-center">
             <Bot className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
             AI Chat Assistant
           </CardTitle>
-        </CardHeader>
+          <Button
+            onClick={handleEndChat}
+            variant="ghost"
+            className="text-white hover:bg-white/20 transition-all duration-300"
+          >
+            <MessageSquareOff className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            End Chat
+          </Button>
+        </div>
+      </CardHeader>
         <CardContent className="flex-grow overflow-auto p-4">
           <div className="space-y-4">
             {messages.map((message) => (

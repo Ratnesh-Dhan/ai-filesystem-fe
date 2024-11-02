@@ -18,7 +18,7 @@ export function Navbar() {
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-4">
-            <Link href="/Home">
+            <Link href="/">
               <Button variant="ghost" className="text-white hover:text-purple-100 hover:bg-white/10">
                 <Home className="h-5 w-5 mr-2" />
                 Home
