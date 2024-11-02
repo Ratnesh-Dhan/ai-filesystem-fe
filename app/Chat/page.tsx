@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Send, User, Bot } from "lucide-react"
 import axios from "axios"
+import { headers } from "next/headers"
 
 type Message = {
   id: number;
@@ -17,7 +18,16 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionID, setSessionID] = useState<string | null>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -25,8 +35,40 @@ export default function ChatPage() {
 
   useEffect(scrollToBottom, [messages])
 
+  useEffect(()=>{
+    const sessionId = generateUUID();
+    setSessionID(sessionId);
+    console.log("start session ",sessionId);
+    // console.log("inside use effect")
+    // if (localStorage.getItem('sessionId') === null) {
+    //   const sessionId = generateUUID();
+    //   console.log({sessionId})
+    //   localStorage.setItem('sessionId', sessionId);
+    //   setSessionID(sessionId);
+    // }
+    // else {
+    //   const sessionId = localStorage.getItem('sessionId');
+    //   setSessionID(sessionId);
+    //   console.log(sessionId, " we got it");
+    // }
+
+    
+    // return ()=>{
+    //   console.log("end session ", sessionId);
+    //   axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/end-chat`, {
+    //     headers: {
+    //       'Temp-Session-ID': sessionId
+    //     }
+    //   }).then((response)=> {
+    //     console.log(response.data.message);
+    //   }).catch((e)=>{
+    //     console.log(e);
+    //     });
+    // }
+  },[]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputMessage(event.target.value)
+    setInputMessage(event.target.value);
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -40,8 +82,14 @@ export default function ChatPage() {
 
     try {
       // Replace this with your actual API call
-      const response = await axios.post('/api/chat', { message: inputMessage })
-      const botMessage: Message = { id: Date.now() + 1, text: response.data.message, sender: 'bot' }
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/chat`, { chat: inputMessage }, {
+        headers: {
+          'Temp-Session-ID': sessionID,
+          // 'Content-Type': 'application/json'
+        }
+      })
+      console.log(response.data.response)
+      const botMessage: Message = { id: Date.now() + 1, text: response.data.response, sender: 'bot' }
       setMessages(prevMessages => [...prevMessages, botMessage])
     } catch (error) {
       console.error("Error:", error)
