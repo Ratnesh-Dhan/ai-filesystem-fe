@@ -86,7 +86,7 @@ export default function ChatPage() {
         }
       }).then((response)=>{
         console.log(response.data.message);
-        if( response.data.status === 200)
+        if( response.status === 200)
           toast.success("Chat ended successfully");
       });
       setMessages([]);
