@@ -6,8 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Send, User, Bot, MessageSquareOff } from "lucide-react"
 import axios from "axios"
-import { headers } from "next/headers"
-import { log } from "console"
 import toast from "react-hot-toast"
 
 type Message = {
@@ -20,7 +18,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [sessionID, setSessionID] = useState<string | null>('')
+  const [sessionID, setSessionID] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   function generateUUID() {
@@ -40,6 +38,7 @@ export default function ChatPage() {
   useEffect(()=>{
     const sessionId = generateUUID();
     setSessionID(sessionId);
+    console.log(sessionId);
   },[]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,20 +56,75 @@ export default function ChatPage() {
 
     try {
       // Replace this with your actual API call
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/chat`, { chat: inputMessage }, {
+      // const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API}/chat`, { chat: inputMessage }, {
+      //   headers: {
+      //     'Temp-Session-ID': sessionID,
+      //     // 'Content-Type': 'application/json'
+      //   }
+      // })
+      // Stream response
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/chat`, {
+        method: 'POST',
         headers: {
-          'Temp-Session-ID': sessionID,
-          // 'Content-Type': 'application/json'
-        }
-      })
-      const botMessage: Message = { id: Date.now() + 1, text: response.data.response, sender: 'bot' }
+            'content-type':'application/json',
+            'Temp-Session-ID': sessionID, 
+        },
+        body: JSON.stringify({
+          chat: inputMessage 
+        })
+      });
+      // end - Stream response
+      const botMessage: Message = { id: Date.now() + 1, text: '', sender: 'bot' }
       setMessages(prevMessages => [...prevMessages, botMessage])
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const reader = response.body?.pipeThrough(new TextDecoderStream("utf-8"))
+      .getReader()
+      if (!reader) {
+        console.log("no reader")
+        throw new Error('Failed to create reader');
+      }
+      let fullText = '';
+      while(true) {
+        const { value , done } = await reader.read();
+
+        if (done) {
+          console.log("it is done");
+          break;
+        }
+        console.log(value);
+
+        fullText += value
+          setMessages(prevMessages => {
+            const lastMessage = prevMessages[prevMessages.length - 1]
+            // Only update if this is still the same message (checking ID)
+            if (lastMessage.id === botMessage.id) {
+              return [
+                ...prevMessages.slice(0, -1),
+                { ...lastMessage, text: fullText }
+              ]
+            }
+            return prevMessages
+          })
+
+          // setMessages(prevMessages => {
+          //   const updatedMessages = [...prevMessages]
+          //   // console.log(updatedMessages[updatedMessages.length - 1].text);
+          //   const text = updatedMessages[updatedMessages.length - 1].text + value // newChunk is the incoming stream data
+          //   updatedMessages[updatedMessages.length - 1].text = text;
+          //   return updatedMessages
+          // })
+
+      }
     } catch (error) {
       console.error("Error:", error)
       const errorMessage: Message = { id: Date.now() + 1, text: "Sorry, I couldn't process your request.", sender: 'bot' }
       setMessages(prevMessages => [...prevMessages, errorMessage])
     } finally {
       setIsLoading(false)
+      console.log(messages[messages.length -1]);
     }
   }
 
